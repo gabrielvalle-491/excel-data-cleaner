@@ -13,17 +13,21 @@ from data_cleaner.rules import RULES, clean_phone, collapse_spaces
 
 @dataclass
 class CleanResult:
+    """Output of clean_dataframe: clean rows, one row per issue, removed duplicates and counters."""
+
     cleaned: pd.DataFrame
     issues: pd.DataFrame
     duplicates: pd.DataFrame
-    stats: dict = field(default_factory=dict)
+    stats: dict[str, int] = field(default_factory=dict)
 
 
 def load_config(path: str | Path) -> dict:
+    """Read the YAML config (column rules, aliases, required fields, dedupe keys)."""
     return yaml.safe_load(Path(path).read_text(encoding="utf-8"))
 
 
 def read_table(path: str | Path) -> pd.DataFrame:
+    """Read an Excel file, or a CSV with auto-detected separator (UTF-8, then Latin-1), as strings."""
     path = Path(path)
     if path.suffix.lower() in (".xlsx", ".xlsm", ".xls"):
         return pd.read_excel(path, dtype=object)
@@ -45,6 +49,7 @@ def normalize_headers(df: pd.DataFrame, aliases: dict[str, list[str]]) -> pd.Dat
 
 
 def clean_dataframe(df: pd.DataFrame, config: dict) -> CleanResult:
+    """Normalize headers, apply each column's rule, log issues with the source row and drop duplicates."""
     df = normalize_headers(df, config.get("aliases", {}))
     columns: dict[str, str] = config["columns"]
     required = set(config.get("required", []))

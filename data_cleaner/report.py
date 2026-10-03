@@ -16,6 +16,7 @@ HEADER_FONT = Font(bold=True, color="FFFFFF")
 
 
 def write_report(result: CleanResult, output: str | Path) -> Path:
+    """Write the Summary, Clean data, Issues and Duplicates sheets and return the report path."""
     output = Path(output)
     output.parent.mkdir(parents=True, exist_ok=True)
 

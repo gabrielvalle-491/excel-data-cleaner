@@ -31,7 +31,8 @@ COUNTRY_CODES = {"Argentina": "54", "Mexico": "52", "Chile": "56", "Spain": "34"
 NULL_TOKENS = {"", "-", "--", "n/a", "na", "null", "none", "s/d", "sin dato", "?"}
 
 
-def is_blank(value) -> bool:
+def is_blank(value: object) -> bool:
+    """True for None, NaN and placeholder tokens such as "-", "n/a" or "sin dato"."""
     if value is None:
         return True
     if isinstance(value, float) and value != value:  # NaN
@@ -39,24 +40,26 @@ def is_blank(value) -> bool:
     return str(value).strip().lower() in NULL_TOKENS
 
 
-def collapse_spaces(value: str) -> str:
+def collapse_spaces(value: object) -> str:
+    """Convert to str, collapse runs of whitespace into one space and trim the ends."""
     return re.sub(r"\s+", " ", str(value)).strip()
 
 
-def clean_text(value) -> Result:
+def clean_text(value: object) -> Result:
+    """Generic text: collapse spaces; blanks become None (never an issue)."""
     if is_blank(value):
         return None, None
     return collapse_spaces(value), None
 
 
-def clean_place(value) -> Result:
+def clean_place(value: object) -> Result:
     """'  buenos   AIRES ' -> 'Buenos Aires'"""
     if is_blank(value):
         return None, None
     return collapse_spaces(value).title(), None
 
 
-def clean_name(value) -> Result:
+def clean_name(value: object) -> Result:
     """'  juan   PÉREZ ' -> 'Juan Pérez' (keeps accents, fixes casing and spaces)."""
     if is_blank(value):
         return None, "Missing name"
@@ -68,7 +71,8 @@ def clean_name(value) -> Result:
     return " ".join(words), None
 
 
-def clean_email(value) -> Result:
+def clean_email(value: object) -> Result:
+    """Lowercase and trim an email, fix common domain typos and flag invalid formats."""
     if is_blank(value):
         return None, "Missing email"
     email = collapse_spaces(value).lower().replace(" ", "").replace(",", ".")
@@ -82,7 +86,7 @@ def clean_email(value) -> Result:
     return email, None
 
 
-def clean_phone(value, country: str | None = "Argentina") -> Result:
+def clean_phone(value: object, country: str | None = "Argentina") -> Result:
     """Normalize to E.164 (+5492657351236). Argentina mobile numbers get the 9 prefix."""
     if is_blank(value):
         return None, "Missing phone"
@@ -118,7 +122,8 @@ def clean_phone(value, country: str | None = "Argentina") -> Result:
     return f"+{digits}", None
 
 
-def clean_date(value) -> Result:
+def clean_date(value: object) -> Result:
+    """Parse any of DATE_FORMATS (or a datetime) into ISO YYYY-MM-DD."""
     if is_blank(value):
         return None, "Missing date"
     if isinstance(value, datetime):
@@ -135,7 +140,7 @@ def clean_date(value) -> Result:
     return text, "Unrecognized date"
 
 
-def clean_amount(value) -> Result:
+def clean_amount(value: object) -> Result:
     """'$ 1.234,50' / '1,234.50' / 'USD 1234.5' -> 1234.5"""
     if is_blank(value):
         return None, "Missing amount"
@@ -153,7 +158,8 @@ def clean_amount(value) -> Result:
     return amount, ("Negative amount" if amount < 0 else None)
 
 
-def clean_country(value) -> Result:
+def clean_country(value: object) -> Result:
+    """Map country aliases ('ARG', 'mx', 'EEUU', 'España') to a standard English name."""
     if is_blank(value):
         return None, "Missing country"
     key = collapse_spaces(value).lower()
@@ -162,7 +168,7 @@ def clean_country(value) -> Result:
     return (country, None) if country else (collapse_spaces(value).title(), "Unknown country")
 
 
-RULES: dict[str, Callable] = {
+RULES: dict[str, Callable[..., Result]] = {
     "text": clean_text,
     "place": clean_place,
     "name": clean_name,

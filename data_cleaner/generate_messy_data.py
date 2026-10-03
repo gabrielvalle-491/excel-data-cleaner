@@ -20,6 +20,7 @@ DATE_STYLES = ["%Y-%m-%d", "%d/%m/%Y", "%d-%m-%Y", "%b %d, %Y", "%d.%m.%Y"]
 
 
 def messy_phone(rng: random.Random) -> str:
+    """Return an Argentine phone number written in one of several real-world styles."""
     area, number = rng.choice(["2657", "11", "351", "261"]), str(rng.randint(100000, 9999999)).zfill(7)
     number = number[: 10 - len(area)].rjust(10 - len(area), "4")
     return rng.choice([
@@ -32,6 +33,7 @@ def messy_phone(rng: random.Random) -> str:
 
 
 def generate(path: Path, rows: int = 500, seed: int = 42) -> Path:
+    """Write a reproducible messy customer file (with duplicates and a blank row) to path."""
     rng = random.Random(seed)
     records = []
     for _ in range(rows):
@@ -64,6 +66,7 @@ def generate(path: Path, rows: int = 500, seed: int = 42) -> Path:
 
 
 def main() -> None:
+    """Command line entry point for the demo data generator."""
     parser = argparse.ArgumentParser(description="Generate a messy customer spreadsheet")
     parser.add_argument("output", type=Path, nargs="?", default=Path("samples/customers_messy.xlsx"))
     parser.add_argument("--rows", type=int, default=500)
