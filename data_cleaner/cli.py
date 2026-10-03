@@ -14,15 +14,20 @@ from data_cleaner.report import write_report
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Clean, validate and standardize a spreadsheet")
+    """Run the cleaner from the command line. Returns the process exit code (0 = ok, 1 = file not found)."""
+    parser = argparse.ArgumentParser(prog="python -m data_cleaner",
+                                     description="Clean, validate and standardize a spreadsheet")
     parser.add_argument("input", type=Path, help="CSV or Excel file")
-    parser.add_argument("-o", "--output", type=Path, default=Path("output/clean_report.xlsx"))
-    parser.add_argument("-c", "--config", type=Path, default=Path("config.yaml"))
+    parser.add_argument("-o", "--output", type=Path, default=Path("output/clean_report.xlsx"),
+                        help="Excel report to write (default: output/clean_report.xlsx)")
+    parser.add_argument("-c", "--config", type=Path, default=Path("config.yaml"),
+                        help="YAML file with column rules and aliases (default: config.yaml)")
     args = parser.parse_args(argv)
 
-    if not args.input.exists():
-        print(f"File not found: {args.input}", file=sys.stderr)
-        return 1
+    for path in (args.input, args.config):
+        if not path.exists():
+            print(f"File not found: {path}", file=sys.stderr)
+            return 1
 
     result = clean_dataframe(read_table(args.input), load_config(args.config))
     path = write_report(result, args.output)
