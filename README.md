@@ -100,7 +100,7 @@ data_cleaner/
 ├── generate_messy_data.py  # realistic dirty demo data
 └── cli.py
 config.yaml                 # column -> rule mapping, aliases, required fields, dedupe keys
-tests/                      # 22 pytest tests, run on every push (GitHub Actions)
+tests/                      # 31 pytest tests, run on every push (GitHub Actions)
 ```
 
 ## Tests
