@@ -107,6 +107,17 @@ tests/                      # 22 pytest tests, run on every push (GitHub Actions
 pytest -q
 ```
 
+## How I would deliver this to a client
+
+If you hire me for this, I would:
+
+- Ask for one or two real (or anonymized) exports of the file you clean today — Excel or CSV, with whatever headers your team already uses — and map those headers and rules in `config.yaml`, so no code changes are needed for your file.
+- Agree with you which columns are required and which ones define a duplicate (for example email and phone), and set them in `required` and `dedupe_on`.
+- Leave it running as a single command, `python -m data_cleaner <your file> -o <report>.xlsx`, that you or a scheduled task (Windows Task Scheduler or cron) can run every week on the latest export.
+- Hand back one Excel report per run: **Clean data** ready to import, **Issues** with the original row number and value of every problem, **Duplicates** that were removed, and a **Summary** with the counts.
+- Make problems visible instead of silent: bad values go to the Issues sheet, a column missing from your file is listed there as `Column missing in file`, and a missing input or config file stops the run with a `File not found` message and exit code 1, so a scheduled task can detect the failure.
+- Add a test for every new rule or file quirk we find, so the weekly run keeps producing the same results.
+
 ## Notes
 
 - Demo data is synthetic (`generate_messy_data.py`). No real customer data.
