@@ -1,0 +1,25 @@
+# Which rule applies to each column. Rules: text, place, name, email, phone, date, amount, country
+columns:
+  name: name
+  email: email
+  phone: phone
+  country: country
+  signup_date: date
+  purchase_amount: amount
+  city: place
+
+# Header variations found in real files -> canonical column name
+aliases:
+  name: ["Nombre", "Nombre y apellido", "Full name", "Cliente"]
+  email: ["E-mail", "Mail", "Correo", "Email address"]
+  phone: ["Telefono", "Teléfono", "Celular", "Phone number", "Tel"]
+  country: ["País", "Pais"]
+  signup_date: ["Fecha alta", "Fecha de alta", "Signup date", "Created at"]
+  purchase_amount: ["Monto compra", "Monto", "Amount", "Total"]
+  city: ["Ciudad", "Localidad", "City"]
+
+# Missing values in these columns are reported as issues
+required: [name, email, phone]
+
+# A row is a duplicate if any of these (already normalized) values was seen before
+dedupe_on: [email, phone]
